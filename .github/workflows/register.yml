@@ -38,4 +38,8 @@ jobs:
           cd .github
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add . && git commit -m "update" && git push -f || echo "Nothing to do"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add . && git commit -m "🤖 Update" && git push -f
+          else
+            echo "No changes"
+          fi
