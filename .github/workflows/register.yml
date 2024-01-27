@@ -12,9 +12,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Run a one-line script
-        run: echo Hello, world!
-      - name: Run a multi-line script
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run script
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          curl https://raw.githubusercontent.com/chouhsiang/cats-and-soup-coupon-codes/main/codes.json -O -s
+          userid=$(cat userid)
+          codes=$(cat codes.json | jq -r '.[].code')
+          log="run.log"
+          finish="finish.log"
+
+          for code in $codes; do
+            if ! grep -q $code $finish; then
+              param="Nickname=${userid}&CouponCode=${code}"
+              echo $param | tee -a $log
+              result=$(curl -X POST -s -d $param https://movaccount.hideaent.net/source/coupon_ok.php)
+              echo $result | tee -a $log
+              if echo $result | jq -e '.result' > /dev/null; then
+                 echo $code | tee -a $finish
+                fi
+              fi
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add . && git commit -m "update" && git push -f
