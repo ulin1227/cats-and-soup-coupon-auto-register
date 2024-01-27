@@ -18,9 +18,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run script
         run: |
-          curl https://raw.githubusercontent.com/chouhsiang/cats-and-soup-coupon-codes/main/codes.json -O -s
+          curl https://raw.githubusercontent.com/chouhsiang/cats-and-soup-coupon-codes/main/codes.yml -O -s
+          yq -o=json '.' codes.yml > codes.json
           userid=$(cat userid)
-          codes=$(cat codes.json | jq -r '.[].code')
+          codes=$(cat codes.json | yq -r '.[].code')
           log=".github/run.log"
           finish=".github/${userid}.log"
 
@@ -35,7 +36,7 @@ jobs:
               fi
             fi
           done
-          cd .github
+          rm -rf codes.json codes.yml
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           if [ -n "$(git status --porcelain)" ]; then
