@@ -1,0 +1,1 @@
+# cats-and-soups-auto-register
